@@ -24,7 +24,11 @@ def Extract_Data(uploaded_file):
     # CONVERT PDF TO IMAGE
     # =====================================================
 
-    images = convert_from_bytes(pdf_bytes)
+    # images = convert_from_bytes(pdf_bytes)
+    images = convert_from_bytes(
+        pdf_bytes,
+        dpi=500
+    )
 
     # =====================================================
     # CROP COORDINATES
@@ -121,6 +125,10 @@ def data_formating(text):
                 if value.startswith("—"):
 
                     value = value.lstrip("—").strip()
+                    
+                    
+                value = value.replace("F", "")
+                value = value.replace("»", "")
 
                 temp[key] = value
 
