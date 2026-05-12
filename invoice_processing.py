@@ -152,10 +152,9 @@
 
 
 
-
-
 # invoice_processing.py
 
+import streamlit as st
 from pdf2image import convert_from_bytes
 import pytesseract
 import pandas as pd
@@ -168,68 +167,109 @@ import re
 CUSTOM_CONFIG = r'--oem 3 --psm 4'
 
 # =========================================================
-# EXTRACT TEXT FROM PDF
+# EXTRACT DATA FROM PDF
 # =========================================================
 
 def extract_data(uploaded_file):
 
-    # READ PDF
-    pdf_bytes = uploaded_file.read()
+    try:
 
-    # CONVERT PDF TO IMAGE
-    images = convert_from_bytes(pdf_bytes)
+        st.write(f"📄 Reading PDF: {uploaded_file.name}")
 
-    # FIRST PAGE
-    first_page = images[0]
+        # =================================================
+        # READ PDF
+        # =================================================
 
-    # =====================================================
-    # CROP AREAS
-    # =====================================================
+        pdf_bytes = uploaded_file.read()
 
-    invoice_details = (50, 300, 1050, 650)
+        st.success("✅ PDF Read Successfully")
 
-    amount_details = (1000, 1300, 1640, 1790)
+        # =================================================
+        # CONVERT PDF TO IMAGE
+        # =================================================
 
-    # =====================================================
-    # CROP IMAGES
-    # =====================================================
+        images = convert_from_bytes(
+            pdf_bytes,
+            first_page=1,
+            last_page=1
+        )
 
-    invoice_img = first_page.crop(invoice_details)
+        st.success("✅ PDF Converted to Image")
 
-    amount_img = first_page.crop(amount_details)
+        # =================================================
+        # FIRST PAGE
+        # =================================================
 
-    # =====================================================
-    # OCR
-    # =====================================================
+        first_page = images[0]
 
-    invoice_text_1 = pytesseract.image_to_string(
-        invoice_img,
-        config=r'--oem 3 --psm 3'
-    )
+        # =================================================
+        # CROP AREAS
+        # =================================================
 
-    invoice_text_2 = pytesseract.image_to_string(
-        invoice_img,
-        config=r'--oem 3 --psm 11'
-    )
+        invoice_details = (50, 300, 1050, 650)
 
-    amount_text = pytesseract.image_to_string(
-        amount_img,
-        config=CUSTOM_CONFIG
-    )
+        amount_details = (1000, 1300, 1640, 1790)
 
-    # =====================================================
-    # FINAL TEXT
-    # =====================================================
+        # =================================================
+        # CROP IMAGES
+        # =================================================
 
-    final_text = (
-        invoice_text_1
-        + "\n"
-        + invoice_text_2
-        + "\n"
-        + amount_text
-    )
+        invoice_img = first_page.crop(invoice_details)
 
-    return final_text
+        amount_img = first_page.crop(amount_details)
+
+        st.success("✅ Image Cropping Done")
+
+        # =================================================
+        # OCR EXTRACTION
+        # =================================================
+
+        invoice_text_1 = pytesseract.image_to_string(
+            invoice_img,
+            config=r'--oem 3 --psm 3'
+        )
+
+        invoice_text_2 = pytesseract.image_to_string(
+            invoice_img,
+            config=r'--oem 3 --psm 11'
+        )
+
+        amount_text = pytesseract.image_to_string(
+            amount_img,
+            config=CUSTOM_CONFIG
+        )
+
+        st.success("✅ OCR Extraction Completed")
+
+        # =================================================
+        # FINAL TEXT
+        # =================================================
+
+        final_text = (
+            invoice_text_1
+            + "\n"
+            + invoice_text_2
+            + "\n"
+            + amount_text
+        )
+
+        # =================================================
+        # DEBUG OCR TEXT
+        # =================================================
+
+        st.subheader(f"📝 OCR Output - {uploaded_file.name}")
+
+        st.text(final_text[:2000])
+
+        return final_text
+
+    except Exception as e:
+
+        st.error(f"❌ Error in OCR Processing: {uploaded_file.name}")
+
+        st.exception(e)
+
+        return None
 
 # =========================================================
 # FORMAT EXTRACTED DATA
@@ -237,43 +277,53 @@ def extract_data(uploaded_file):
 
 def format_data(text):
 
-    required_fields = [
-        "Invoice Num",
-        "PO Num",
-        "Taxable Amount",
-        "Total Payable (A+B)"
-    ]
+    try:
 
-    row_data = {}
+        required_fields = [
+            "Invoice Num",
+            "PO Num",
+            "Taxable Amount",
+            "Total Payable (A+B)"
+        ]
 
-    lines = text.split("\n")
+        row_data = {}
 
-    for line in lines:
+        lines = text.split("\n")
 
-        match = re.match(
-            r"^(.*?)\s*:\s*(.*)$",
-            line
-        )
+        for line in lines:
 
-        if match:
+            match = re.match(
+                r"^(.*?)\s*:\s*(.*)$",
+                line
+            )
 
-            key = match.group(1).strip()
+            if match:
 
-            value = match.group(2).strip()
+                key = match.group(1).strip()
 
-            if key in required_fields:
+                value = match.group(2).strip()
 
-                value = (
-                    value
-                    .replace("₹", "")
-                    .replace(",", "")
-                    .replace("—", "")
-                    .strip()
-                )
+                if key in required_fields:
 
-                row_data[key] = value
+                    value = (
+                        value
+                        .replace("₹", "")
+                        .replace(",", "")
+                        .replace("—", "")
+                        .strip()
+                    )
 
-    return row_data
+                    row_data[key] = value
+
+        return row_data
+
+    except Exception as e:
+
+        st.error("❌ Error while formatting extracted data")
+
+        st.exception(e)
+
+        return {}
 
 # =========================================================
 # MAIN FUNCTION
@@ -281,34 +331,85 @@ def format_data(text):
 
 def process_invoice_pdfs(invoice_files):
 
-    final_data = []
+    try:
 
-    for file in invoice_files:
+        final_data = []
 
-        try:
+        for file in invoice_files:
 
-            # RESET POINTER
-            file.seek(0)
+            st.markdown("---")
 
-            # EXTRACT TEXT
-            text = extract_data(file)
+            st.write(f"🚀 Processing File: {file.name}")
 
-            # FORMAT DATA
-            row = format_data(text)
+            try:
 
-            # ADD FILE NAME
-            row["File Name"] = file.name
+                # RESET FILE POINTER
+                file.seek(0)
 
-            final_data.append(row)
+                # =============================================
+                # OCR
+                # =============================================
 
-        except Exception as e:
+                text = extract_data(file)
 
-            print(f"Error processing {file.name}: {e}")
+                if not text:
 
-    # =====================================================
-    # DATAFRAME
-    # =====================================================
+                    st.warning(f"⚠ No OCR text extracted from {file.name}")
 
-    df = pd.DataFrame(final_data)
+                    continue
 
-    return df
+                # =============================================
+                # FORMAT DATA
+                # =============================================
+
+                row = format_data(text)
+
+                if not row:
+
+                    st.warning(f"⚠ No fields extracted from {file.name}")
+
+                # =============================================
+                # ADD FILE NAME
+                # =============================================
+
+                row["File Name"] = file.name
+
+                final_data.append(row)
+
+                st.success(f"✅ Successfully Processed: {file.name}")
+
+            except Exception as e:
+
+                st.error(f"❌ Failed Processing: {file.name}")
+
+                st.exception(e)
+
+        # =================================================
+        # FINAL DATAFRAME
+        # =================================================
+
+        df = pd.DataFrame(final_data)
+
+        # =================================================
+        # SHOW FINAL RESULT
+        # =================================================
+
+        if df.empty:
+
+            st.error("❌ No data extracted from uploaded PDFs")
+
+        else:
+
+            st.success("✅ Invoice Data Extracted Successfully")
+
+            st.dataframe(df)
+
+        return df
+
+    except Exception as e:
+
+        st.error("❌ Main Processing Error")
+
+        st.exception(e)
+
+        return pd.DataFrame()
