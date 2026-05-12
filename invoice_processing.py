@@ -176,52 +176,24 @@ def extract_data(uploaded_file):
 
         st.write(f"📄 Reading PDF: {uploaded_file.name}")
 
-        # =================================================
-        # READ PDF
-        # =================================================
-
         pdf_bytes = uploaded_file.read()
 
-        st.success("✅ PDF Read Successfully")
-
-        # =================================================
-        # CONVERT PDF TO IMAGE
-        # =================================================
-
-        images = convert_from_bytes(
-            pdf_bytes,
-            first_page=1,
-            last_page=1
-        )
+        images = convert_from_bytes(pdf_bytes)
 
         st.success("✅ PDF Converted to Image")
-
-        # =================================================
-        # FIRST PAGE
-        # =================================================
-
-        first_page = images[0]
-
-        # =================================================
-        # CROP AREAS
-        # =================================================
 
         invoice_details = (50, 300, 1050, 650)
 
         amount_details = (1000, 1300, 1640, 1790)
 
-        # =================================================
-        # CROP IMAGES
-        # =================================================
+        invoice_img = images[0].crop(invoice_details)
 
-        invoice_img = first_page.crop(invoice_details)
-
-        amount_img = first_page.crop(amount_details)
+        amount_img = images[0].crop(amount_details)
 
         st.success("✅ Image Cropping Done")
 
         # =================================================
-        # OCR EXTRACTION
+        # OCR
         # =================================================
 
         invoice_text_1 = pytesseract.image_to_string(
@@ -236,30 +208,31 @@ def extract_data(uploaded_file):
 
         amount_text = pytesseract.image_to_string(
             amount_img,
-            config=CUSTOM_CONFIG
+            config=r'--oem 3 --psm 4'
         )
 
-        st.success("✅ OCR Extraction Completed")
-
         # =================================================
-        # FINAL TEXT
+        # IMPORTANT
+        # USE OLD WORKING LOGIC
         # =================================================
 
         final_text = (
-            invoice_text_1
+            '\n'.join(
+                invoice_text_1
+                .replace('\n\n', '\n')
+                .split('Campaign')[:1]
+            )
             + "\n"
-            + invoice_text_2
-            + "\n"
-            + amount_text
+            + "\n".join(
+                invoice_text_2
+                .replace('\n\n', '\n')
+                .split('\n')[2:]
+            )
+            + "\n\n"
+            + amount_text.replace('\n\n', '\n')
         )
 
-        # =================================================
-        # DEBUG OCR TEXT
-        # =================================================
-
-        st.subheader(f"📝 OCR Output - {uploaded_file.name}")
-
-        st.text(final_text[:2000])
+        st.success("✅ OCR Extraction Completed")
 
         return final_text
 
@@ -308,7 +281,7 @@ def format_data(text):
                     value = (
                         value
                         .replace("₹", "")
-                        .replace(",", "")
+                        # .replace(",", "")
                         .replace("—", "")
                         .strip()
                     )
