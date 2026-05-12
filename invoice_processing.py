@@ -42,10 +42,10 @@ def Extract_Data(uploaded_file):
     invoice_details_img = images[0].crop(invoice_details)
 
     amount_img = images[0].crop(amount_details)
-    invoice_details_img = invoice_details_img.convert("L")
+    # invoice_details_img = invoice_details_img.convert("L")
     
     amount_img = amount_img.convert("L")
-    st.image(amount_img, caption="Amount Crop")
+    # st.image(amount_img, caption="Amount Crop")
 
     # =====================================================
     # OCR
@@ -122,11 +122,25 @@ def data_formating(text):
 
             if key in required_fields:
 
-                # REMOVE LEADING DASH
+                # # REMOVE LEADING DASH
+                # if value.startswith("—"):
+
+                #     value = value.lstrip("—").strip()
+
+                # temp[key] = value
+
                 if value.startswith("—"):
 
                     value = value.lstrip("—").strip()
-
+                
+                # CLEAN OCR GARBAGE
+                value = re.sub(r'[^0-9A-Za-z,./()-]', '', value)
+                
+                # FIX AMOUNT FIELDS
+                if key in ["Taxable Amount", "Total Payable (A+B)"]:
+                
+                    value = re.sub(r'[^0-9,.]', '', value)
+                
                 temp[key] = value
 
     return temp
