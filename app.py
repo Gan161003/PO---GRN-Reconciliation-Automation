@@ -874,10 +874,22 @@ st.set_page_config(
 # SIDEBAR MENU
 # =========================================================
 
+# tool = st.sidebar.selectbox(
+#     "Select Tool",
+#     [
+#         "PO GRN Reconciliation"
+#     ]
+# )
+
+# # # =========================================================
+# # # SIDEBAR MENU
+# # # =========================================================
+
 tool = st.sidebar.selectbox(
     "Select Tool",
     [
-        "PO GRN Reconciliation"
+        "PO GRN Reconciliation",
+        "Invoice OCR Processing"
     ]
 )
 
