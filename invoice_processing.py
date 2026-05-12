@@ -125,10 +125,6 @@ def data_formating(text):
                 if value.startswith("—"):
 
                     value = value.lstrip("—").strip()
-                    
-                    
-                value = value.replace("F", "")
-                value = value.replace("»", "")
 
                 temp[key] = value
 
