@@ -25,10 +25,7 @@ def Extract_Data(uploaded_file):
     # =====================================================
 
     # images = convert_from_bytes(pdf_bytes)
-    images = convert_from_bytes(
-        pdf_bytes,
-        dpi=500
-    )
+    images = convert_from_bytes(pdf_bytes)
 
     # =====================================================
     # CROP COORDINATES
@@ -45,6 +42,10 @@ def Extract_Data(uploaded_file):
     invoice_details_img = images[0].crop(invoice_details)
 
     amount_img = images[0].crop(amount_details)
+    invoice_details_img = invoice_details_img.convert("L")
+    
+    amount_img = amount_img.convert("L")
+    st.image(amount_img, caption="Amount Crop")
 
     # =====================================================
     # OCR
