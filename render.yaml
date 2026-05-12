@@ -1,11 +1,16 @@
 services:
   - type: web
-    name: po-grn-reconciliation-automation
-    runtime: python
+    name: invoice-ocr
+    env: python
 
-    buildCommand: |
-      apt-get update
-      apt-get install -y tesseract-ocr poppler-utils
-      pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt
 
     startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0
+
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+
+    aptPackages:
+      - tesseract-ocr
+      - poppler-utils
