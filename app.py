@@ -1345,9 +1345,20 @@ def run_po_grn():
 # MAIN
 # =========================================================
 
-# if tool == "PO GRN Reconciliation":
-run_po_grn()
+tool = st.sidebar.selectbox(
+    "Select Tool",
+    [
+        "PO GRN Reconciliation"
+    ]
+)
 
+# =========================================================
+# MAIN
+# =========================================================
+
+if tool == "PO GRN Reconciliation":
+
+    run_po_grn()
 
 
 
