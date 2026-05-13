@@ -1346,8 +1346,7 @@ def run_po_grn():
 # =========================================================
 
 # if tool == "PO GRN Reconciliation":
-
-    run_po_grn()
+run_po_grn()
 
 
 
