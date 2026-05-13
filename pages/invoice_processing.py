@@ -226,3 +226,49 @@ def process_invoice_pdfs(invoice_files):
     st.dataframe(df)
 
     return df
+
+
+
+
+
+# =========================================================
+# PAGE UI
+# =========================================================
+
+st.set_page_config(
+    page_title="Invoice OCR Processing",
+    layout="wide"
+)
+
+st.title("📄 Invoice OCR Processing")
+
+st.markdown("---")
+
+uploaded_pdfs = st.file_uploader(
+    "Upload Invoice PDFs",
+    type=["pdf"],
+    accept_multiple_files=True
+)
+
+if uploaded_pdfs:
+
+    st.success(f"{len(uploaded_pdfs)} PDFs Uploaded")
+
+    if st.button("🚀 Process Invoice PDFs"):
+
+        with st.spinner("Processing PDFs..."):
+
+            df = process_invoice_pdfs(uploaded_pdfs)
+
+        if df.empty:
+
+            st.error("No data extracted")
+
+        else:
+
+            st.success("✅ Invoice Extraction Completed")
+
+            st.dataframe(
+                df,
+                use_container_width=True
+            )
