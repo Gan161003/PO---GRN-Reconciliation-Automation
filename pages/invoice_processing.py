@@ -5,6 +5,8 @@ from pdf2image import convert_from_bytes
 import pytesseract
 import pandas as pd
 import re
+from io import BytesIO
+
 
 # =========================================================
 # OCR FUNCTION
@@ -271,4 +273,25 @@ if uploaded_pdfs:
             st.dataframe(
                 df,
                 use_container_width=True
+            )
+            output = BytesIO()
+
+            with pd.ExcelWriter(
+                output,
+                engine="xlsxwriter"
+            ) as writer:
+            
+                df.to_excel(
+                    writer,
+                    index=False,
+                    sheet_name="Invoices"
+                )
+            
+            output.seek(0)
+            
+            st.download_button(
+                label="📥 Download Invoice Excel",
+                data=output,
+                file_name="invoice_data.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
