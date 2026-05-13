@@ -885,13 +885,13 @@ st.set_page_config(
 # # # SIDEBAR MENU
 # # # =========================================================
 
-tool = st.sidebar.selectbox(
-    "Select Tool",
-    [
-        "PO GRN Reconciliation",
-        "Invoice OCR Processing"
-    ]
-)
+# tool = st.sidebar.selectbox(
+#     "Select Tool",
+#     [
+#         "PO GRN Reconciliation",
+#         "Invoice OCR Processing"
+#     ]
+# )
 
 # =========================================================
 # TOOL 1
@@ -1345,7 +1345,7 @@ def run_po_grn():
 # MAIN
 # =========================================================
 
-if tool == "PO GRN Reconciliation":
+# if tool == "PO GRN Reconciliation":
 
     run_po_grn()
 
