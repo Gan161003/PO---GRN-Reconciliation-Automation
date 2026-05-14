@@ -1327,6 +1327,14 @@ def run_po_grn():
                             i,
                             column_len
                         )
+                
+                    except:
+                
+                        worksheet.set_column(
+                            i,
+                            i,
+                            20
+                        )
 
                 output.seek(0)
 
