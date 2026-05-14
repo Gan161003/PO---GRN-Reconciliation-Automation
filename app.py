@@ -1312,29 +1312,33 @@ def run_po_grn():
 
                     worksheet = writer.sheets['Final Output']
 
+                    # for i, col in enumerate(final_df.columns):
                     for i, col in enumerate(final_df.columns):
-
-                        column_len = max(
-                            final_df[col]
-                            .astype(str)
-                            .map(len)
-                            .max(),
-                            len(col)
-                        ) + 5
-
-                        worksheet.set_column(
-                            i,
-                            i,
-                            column_len
-                        )
-                
-                    except:
-                
-                        worksheet.set_column(
-                            i,
-                            i,
-                            20
-                        )
+                    
+                        try:
+                    
+                            column_len = max(
+                                final_df[col]
+                                .fillna("")
+                                .astype(str)
+                                .map(len)
+                                .max(),
+                                len(str(col))
+                            ) + 5
+                    
+                            worksheet.set_column(
+                                i,
+                                i,
+                                column_len
+                            )
+                    
+                        except:
+                    
+                            worksheet.set_column(
+                                i,
+                                i,
+                                20
+                            )
 
                 output.seek(0)
 
