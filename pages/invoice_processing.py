@@ -860,9 +860,23 @@ def Extract_Data_Madison(pdf_bytes):
     invoice_details_img = images[0].crop(invoice_details)
     amount_img = images[0].crop(amount_details)
 
-    invoice_details_text = pytesseract.image_to_string(
+    text1 = pytesseract.image_to_string(
         invoice_details_img,
-        config=r'--oem 3 --psm 3'
+        config='--oem 3 --psm 4'
+    )
+    
+    text2 = pytesseract.image_to_string(
+        invoice_details_img,
+        config='--oem 3 --psm 6'
+    )
+    
+    text3 = pytesseract.image_to_string(
+        invoice_details_img,
+        config='--oem 3 --psm 11'
+    )
+    
+    invoice_details_text = "\n".join(
+        [text1, text2, text3]
     )
 
     invoice_details_text_2 = pytesseract.image_to_string(
@@ -890,6 +904,28 @@ def Extract_Data_Madison(pdf_bytes):
     )
 
     return text
+
+file_name = file_name.lower()
+
+if "madison" in file_name:
+    return data_formating_Madison(
+        Extract_Data_Madison(pdf_bytes)
+    )
+
+elif "meta" in file_name:
+    return data_formating_Meta(
+        Extract_Data_Meta(pdf_bytes)
+    )
+
+elif "google" in file_name:
+    return data_formating_Google(
+        Extract_Data_Google(pdf_bytes)
+    )
+
+elif "lokmat" in file_name:
+    return data_formating_Lokmat(
+        Extract_Data_Lokmat(pdf_bytes)
+    )
 
 
 def data_formating_Madison(text):
@@ -936,9 +972,23 @@ def Extract_Data_Meta(pdf_bytes):
     invoice_details_img = images[0].crop(invoice_details)
     amount_img = images[0].crop(amount_details)
 
-    invoice_details_text = pytesseract.image_to_string(
+    text1 = pytesseract.image_to_string(
         invoice_details_img,
-        config=r'--oem 3 --psm 4'
+        config='--oem 3 --psm 4'
+    )
+    
+    text2 = pytesseract.image_to_string(
+        invoice_details_img,
+        config='--oem 3 --psm 6'
+    )
+    
+    text3 = pytesseract.image_to_string(
+        invoice_details_img,
+        config='--oem 3 --psm 11'
+    )
+    
+    invoice_details_text = "\n".join(
+        [text1, text2, text3]
     )
 
     amount_text = pytesseract.image_to_string(
@@ -998,9 +1048,23 @@ def Extract_Data_Google(pdf_bytes):
     invoice_details_img = images[0].crop(invoice_details)
     amount_img = images[0].crop(amount_details)
 
-    invoice_details_text = pytesseract.image_to_string(
+    text1 = pytesseract.image_to_string(
         invoice_details_img,
-        config=r'--oem 3 --psm 6'
+        config='--oem 3 --psm 4'
+    )
+    
+    text2 = pytesseract.image_to_string(
+        invoice_details_img,
+        config='--oem 3 --psm 6'
+    )
+    
+    text3 = pytesseract.image_to_string(
+        invoice_details_img,
+        config='--oem 3 --psm 11'
+    )
+    
+    invoice_details_text = "\n".join(
+        [text1, text2, text3]
     )
 
     amount_text = pytesseract.image_to_string(
@@ -1089,9 +1153,23 @@ def Extract_Data_Lokmat(pdf_bytes):
     invoice_details_img = images[0].crop(invoice_details)
     amount_img = images[0].crop(amount_details)
 
-    invoice_details_text = pytesseract.image_to_string(
+    text1 = pytesseract.image_to_string(
         invoice_details_img,
-        config=r'--oem 3 --psm 4'
+        config='--oem 3 --psm 4'
+    )
+    
+    text2 = pytesseract.image_to_string(
+        invoice_details_img,
+        config='--oem 3 --psm 6'
+    )
+    
+    text3 = pytesseract.image_to_string(
+        invoice_details_img,
+        config='--oem 3 --psm 11'
+    )
+    
+    invoice_details_text = "\n".join(
+        [text1, text2, text3]
     )
 
     amount_text = pytesseract.image_to_string(
@@ -1191,7 +1269,7 @@ def check_file(pdf_bytes):
             Extract_Data_Lokmat(pdf_bytes)
         )
 
-    return {}
+    return {"Error": "Vendor not detected"}
 
 
 # ==========================================
@@ -1364,6 +1442,12 @@ if uploaded_files:
     )
 
     df = col_normalize(df)
+    if "Invoice Number" in df.columns:
+        df["Status"] = df["Invoice Number"].apply(
+            lambda x: "Success"
+            if pd.notna(x) and str(x).strip()
+            else "Review"
+        )
 
     cols = [
         "File Name",
