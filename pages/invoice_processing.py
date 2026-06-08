@@ -836,6 +836,7 @@ import pytesseract
 import re
 from pdf2image import convert_from_bytes
 from io import BytesIO
+from concurrent.futures import ThreadPoolExecutor
 
 # ==========================================
 # CONFIG
@@ -1357,29 +1358,27 @@ if uploaded_files:
 
     with st.spinner("Processing PDFs..."):
 
-        for file in uploaded_files:
-
         def process_pdf(file):
 
             try:
-        
+
                 pdf_bytes = file.read()
-        
+
                 images = convert_from_bytes(
                     pdf_bytes,
                     dpi=250,
                     first_page=1,
                     last_page=1
                 )
-        
+
                 result = check_file(images)
-        
+
                 result["File Name"] = file.name
-        
+
                 return result
-        
+
             except Exception as e:
-        
+
                 return {
                     "File Name": file.name,
                     "Error": str(e)
