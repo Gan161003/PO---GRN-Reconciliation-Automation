@@ -305,55 +305,32 @@
 
 
 
-
-
-
-
-
-
-
-
-
 import streamlit as st
-from pdf2image import convert_from_path
-import pytesseract
 import pandas as pd
+import pytesseract
 import re
-import tempfile
-import os
+from pdf2image import convert_from_bytes
+from io import BytesIO
 
-# =====================================================
-# PAGE CONFIG
-# =====================================================
-
-st.set_page_config(
-    page_title="Invoice OCR Extraction",
-    layout="wide"
-)
-
-st.title("📄 Invoice OCR Extraction Tool")
-
-# =====================================================
-# POPPLER PATH
-# =====================================================
+# ==========================================
+# CONFIG
+# ==========================================
 
 POPPLER_PATH = r"C:\poppler-24.08.0\Library\bin"
 
-# =====================================================
+# ==========================================
 # MADISON
-# =====================================================
+# ==========================================
 
-def Extract_Data_Madison(path):
+def Extract_Data_Madison(pdf_bytes):
 
-    images = convert_from_path(
-        path,
+    images = convert_from_bytes(
+        pdf_bytes,
         poppler_path=POPPLER_PATH
     )
 
-    custom_config = r'--oem 3 --psm 4'
-
-    invoice_details = (50,300,1050,650)
-    amount_details = (1000,1300,1640,1790)
+    invoice_details = (50, 300, 1050, 650)
+    amount_details = (1000, 1300, 1640, 1790)
 
     invoice_details_img = images[0].crop(invoice_details)
     amount_img = images[0].crop(amount_details)
@@ -370,23 +347,21 @@ def Extract_Data_Madison(path):
 
     amount_text = pytesseract.image_to_string(
         amount_img,
-        config=custom_config
+        config=r'--oem 3 --psm 4'
     )
 
     text = (
         '\n'.join(
-            invoice_details_text
-            .replace('\n\n','\n')
+            invoice_details_text.replace('\n\n', '\n')
             .split('Campaign')[:1]
         )
         + "\n"
         + "\n".join(
-            invoice_details_text_2
-            .replace('\n\n','\n')
+            invoice_details_text_2.replace('\n\n', '\n')
             .split('\n')[2:]
         )
         + "\n\n"
-        + amount_text.replace('\n\n','\n')
+        + amount_text.replace('\n\n', '\n')
     )
 
     return text
@@ -405,10 +380,7 @@ def data_formating_Madison(text):
 
     for line in text.strip().split("\n"):
 
-        match = re.match(
-            r"^(.*?)\s*:\s*(.*)$",
-            line
-        )
+        match = re.match(r"^(.*?)\s*:\s*(.*)$", line)
 
         if match:
 
@@ -424,19 +396,20 @@ def data_formating_Madison(text):
 
     return temp
 
-# =====================================================
+
+# ==========================================
 # META
-# =====================================================
+# ==========================================
 
-def Extract_Data_Meta(path):
+def Extract_Data_Meta(pdf_bytes):
 
-    images = convert_from_path(
-        path,
+    images = convert_from_bytes(
+        pdf_bytes,
         poppler_path=POPPLER_PATH
     )
 
-    invoice_details = (1040,165,1600,390)
-    amount_details = (1125,1730,1650,1970)
+    invoice_details = (1040, 165, 1600, 390)
+    amount_details = (1125, 1730, 1650, 1970)
 
     invoice_details_img = images[0].crop(invoice_details)
     amount_img = images[0].crop(amount_details)
@@ -452,9 +425,8 @@ def Extract_Data_Meta(path):
     )
 
     text = (
-        invoice_details_text.replace('\n\n','\n')
-        +
-        amount_text.replace('\n\n','\n')
+        invoice_details_text.replace('\n\n', '\n')
+        + amount_text.replace('\n\n', '\n')
     )
 
     return text
@@ -473,10 +445,7 @@ def data_formating_Meta(text):
 
     for line in text.strip().split("\n"):
 
-        match = re.match(
-            r"^(.*?)\s*:\s*(.*)$",
-            line
-        )
+        match = re.match(r"^(.*?)\s*:\s*(.*)$", line)
 
         if match:
 
@@ -492,19 +461,20 @@ def data_formating_Meta(text):
 
     return temp
 
-# =====================================================
+
+# ==========================================
 # GOOGLE
-# =====================================================
+# ==========================================
 
-def Extract_Data_Google(path):
+def Extract_Data_Google(pdf_bytes):
 
-    images = convert_from_path(
-        path,
+    images = convert_from_bytes(
+        pdf_bytes,
         poppler_path=POPPLER_PATH
     )
 
-    invoice_details = (90,900,750,1050)
-    amount_details = (800,1250,1600,1450)
+    invoice_details = (90, 900, 750, 1050)
+    amount_details = (800, 1250, 1600, 1450)
 
     invoice_details_img = images[0].crop(invoice_details)
     amount_img = images[0].crop(amount_details)
@@ -520,14 +490,11 @@ def Extract_Data_Google(path):
     )
 
     text = (
-        "\n".join(
-            [
-                re.sub(r'\s*\.+\s*', ': ', i)
-                for i in invoice_details_text.split("\n")
-            ]
-        )
-        +
-        amount_text.replace('\n\n','\n')
+        "\n".join([
+            re.sub(r'\s*\.+\s*', ': ', i)
+            for i in invoice_details_text.split("\n")
+        ])
+        + amount_text.replace('\n\n', '\n')
     )
 
     return text
@@ -558,15 +525,11 @@ def data_formating_Google(text):
             if value.strip():
 
                 if key.strip() in required_fields:
-
                     temp[key.strip()] = value.strip()
 
         else:
 
-            m = re.search(
-                r'^(.*?)\s*%?([\d,]+\.\d+)',
-                line
-            )
+            m = re.search(r'^(.*?)\s*%?([\d,]+\.\d+)', line)
 
             if m:
 
@@ -588,49 +551,44 @@ def data_formating_Google(text):
                 )
 
                 if key in required_fields:
-
                     temp[key] = value
 
     return temp
 
-# =====================================================
+
+# ==========================================
 # LOKMAT
-# =====================================================
+# ==========================================
 
-def Extract_Data_Lokmat(path):
+def Extract_Data_Lokmat(pdf_bytes):
 
-    images = convert_from_path(
-        path,
+    images = convert_from_bytes(
+        pdf_bytes,
         poppler_path=POPPLER_PATH
     )
 
-    custom_config = r'--oem 3 --psm 4'
-
-    invoice_details = (150,200,700,290)
-    amount_details = (940,1260,1490,1480)
+    invoice_details = (150, 200, 700, 290)
+    amount_details = (940, 1260, 1490, 1480)
 
     invoice_details_img = images[0].crop(invoice_details)
     amount_img = images[0].crop(amount_details)
 
     invoice_details_text = pytesseract.image_to_string(
         invoice_details_img,
-        config=custom_config
+        config=r'--oem 3 --psm 4'
     )
 
     amount_text = pytesseract.image_to_string(
         amount_img,
-        config=custom_config
+        config=r'--oem 3 --psm 4'
     )
 
     text = (
-        "\n".join(
-            [
-                re.sub(r'\s*\.+\s*', ': ', i)
-                for i in invoice_details_text.split("\n")
-            ]
-        )
-        +
-        amount_text.replace('\n\n','\n')
+        "\n".join([
+            re.sub(r'\s*\.+\s*', ': ', i)
+            for i in invoice_details_text.split("\n")
+        ])
+        + amount_text.replace('\n\n', '\n')
     )
 
     return text
@@ -661,15 +619,11 @@ def data_formating_Lokmat(text):
             if value.strip():
 
                 if key.strip() in required_fields:
-
                     temp[key.strip()] = value.strip()
 
         else:
 
-            m = re.search(
-                r'^(.*?)\s*%?([\d,]+\.\d+)',
-                line
-            )
+            m = re.search(r'^(.*?)\s*%?([\d,]+\.\d+)', line)
 
             if m:
 
@@ -683,19 +637,19 @@ def data_formating_Lokmat(text):
                 )
 
                 if key.strip() in required_fields:
-
                     temp[key] = value
 
     return temp
 
-# =====================================================
-# FILE CHECKER
-# =====================================================
 
-def check_file(path):
+# ==========================================
+# DETECT FILE TYPE
+# ==========================================
 
-    images = convert_from_path(
-        path,
+def check_file(pdf_bytes):
+
+    images = convert_from_bytes(
+        pdf_bytes,
         poppler_path=POPPLER_PATH
     )
 
@@ -705,53 +659,53 @@ def check_file(path):
     )
 
     if 'madison' in text.lower():
-
         return data_formating_Madison(
-            Extract_Data_Madison(path)
+            Extract_Data_Madison(pdf_bytes)
         )
 
     elif 'meta' in text.lower():
-
         return data_formating_Meta(
-            Extract_Data_Meta(path)
+            Extract_Data_Meta(pdf_bytes)
         )
 
     elif 'google' in text.lower():
-
         return data_formating_Google(
-            Extract_Data_Google(path)
+            Extract_Data_Google(pdf_bytes)
         )
 
     elif 'lokmat' in text.lower():
-
         return data_formating_Lokmat(
-            Extract_Data_Lokmat(path)
+            Extract_Data_Lokmat(pdf_bytes)
         )
 
     return {}
 
-# =====================================================
-# COLUMN NORMALIZATION
-# =====================================================
+
+# ==========================================
+# NORMALIZE COLUMNS
+# ==========================================
 
 def col_normalize(df):
 
     df["Invoice Number"] = df[
-        ["Invoice Num","Invoice #","Invoice number","Invoice No"]
-    ].bfill(axis=1).iloc[:,0]
+        ["Invoice Num",
+         "Invoice #",
+         "Invoice number",
+         "Invoice No"]
+    ].bfill(axis=1).iloc[:, 0]
 
     df["Taxable Amount"] = df[
-        ["Taxable Amount","Subtotal","Taxable Value"]
-    ].bfill(axis=1).iloc[:,0]
+        ["Taxable Amount",
+         "Subtotal",
+         "Taxable Value"]
+    ].bfill(axis=1).iloc[:, 0]
 
     df["Total Amount"] = df[
-        [
-            "Total Payable (A+B)",
-            "Invoice Total",
-            "Total amount",
-            "Total Invoice Value"
-        ]
-    ].bfill(axis=1).iloc[:,0]
+        ["Total Payable (A+B)",
+         "Invoice Total",
+         "Total amount",
+         "Total Invoice Value"]
+    ].bfill(axis=1).iloc[:, 0]
 
     cols_to_drop = [
         "Invoice Num",
@@ -771,7 +725,7 @@ def col_normalize(df):
         errors="ignore"
     )
 
-    df = df[
+    return df[
         [
             "Invoice Number",
             "PO Num",
@@ -780,68 +734,43 @@ def col_normalize(df):
         ]
     ]
 
-    return df
 
-# =====================================================
-# STREAMLIT APP
-# =====================================================
+# ==========================================
+# STREAMLIT UI
+# ==========================================
+
+st.set_page_config(
+    page_title="Invoice OCR Extractor",
+    layout="wide"
+)
+
+st.title("📄 Invoice OCR Extractor")
 
 uploaded_files = st.file_uploader(
-    "Upload Invoice PDFs",
+    "Upload PDF Files",
     type=["pdf"],
     accept_multiple_files=True
 )
 
 if uploaded_files:
 
-    data = {}
+    results = {}
     count = 1
 
-    progress = st.progress(0)
+    with st.spinner("Processing PDFs..."):
 
-    for idx, uploaded_file in enumerate(uploaded_files):
+        for file in uploaded_files:
 
-        st.write(
-            f"📄 Processing: {uploaded_file.name}"
-        )
+            pdf_bytes = file.read()
 
-        with tempfile.NamedTemporaryFile(
-            delete=False,
-            suffix=".pdf"
-        ) as tmp:
+            results[count] = check_file(pdf_bytes)
 
-            tmp.write(uploaded_file.read())
-
-            temp_pdf = tmp.name
-
-        try:
-
-            data[count] = check_file(temp_pdf)
+            results[count]["File Name"] = file.name
 
             count += 1
 
-            st.success(
-                f"✅ Completed: {uploaded_file.name}"
-            )
-
-        except Exception as e:
-
-            st.error(
-                f"❌ Failed: {uploaded_file.name}"
-            )
-
-            st.exception(e)
-
-        finally:
-
-            os.remove(temp_pdf)
-
-        progress.progress(
-            (idx + 1) / len(uploaded_files)
-        )
-
     df = pd.DataFrame.from_dict(
-        data,
+        results,
         orient="index"
     )
 
@@ -852,24 +781,38 @@ if uploaded_files:
 
     df = col_normalize(df)
 
-    st.subheader("Extracted Invoice Data")
+    cols = [
+        "File Name",
+        "Invoice Number",
+        "PO Num",
+        "Taxable Amount",
+        "Total Amount"
+    ]
+
+    df = df[cols]
+
+    st.success("Processing Completed")
 
     st.dataframe(
         df,
         use_container_width=True
     )
 
-    excel_file = "invoice_data.xlsx"
+    excel_buffer = BytesIO()
 
-    df.to_excel(
-        excel_file,
-        index=False
-    )
+    with pd.ExcelWriter(
+        excel_buffer,
+        engine="openpyxl"
+    ) as writer:
 
-    with open(excel_file, "rb") as f:
-
-        st.download_button(
-            "📥 Download Excel",
-            f,
-            file_name="invoice_data.xlsx"
+        df.to_excel(
+            writer,
+            index=False
         )
+
+    st.download_button(
+        label="📥 Download Excel",
+        data=excel_buffer.getvalue(),
+        file_name="invoice_data.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
