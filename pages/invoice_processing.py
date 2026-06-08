@@ -1341,7 +1341,7 @@ if uploaded_files:
             pdf_bytes = file.read()
 
             try:
-                results[count] = check_file(pdf_bytes)
+                results[count] = check_file(pdf_bytes, file.name)
                 
             except Exception as e:
                 results[count] = {
