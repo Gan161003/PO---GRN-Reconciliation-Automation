@@ -852,7 +852,7 @@ from io import BytesIO
 
 def Extract_Data_Madison(pdf_bytes):
 
-    images = convert_from_bytes(pdf_bytes)
+    images = convert_from_bytes(pdf_bytes,dpi=500)
 
     invoice_details = (50, 300, 1050, 650)
     amount_details = (1000, 1300, 1640, 1790)
@@ -928,7 +928,7 @@ def data_formating_Madison(text):
 
 def Extract_Data_Meta(pdf_bytes):
 
-    images = convert_from_bytes(pdf_bytes)
+    images = convert_from_bytes(pdf_bytes,dpi=500)
 
     invoice_details = (1040, 165, 1600, 390)
     amount_details = (1125, 1730, 1650, 1970)
@@ -990,7 +990,7 @@ def data_formating_Meta(text):
 
 def Extract_Data_Google(pdf_bytes):
 
-    images = convert_from_bytes(pdf_bytes)
+    images = convert_from_bytes(pdf_bytes,dpi=500)
 
     invoice_details = (90, 900, 750, 1050)
     amount_details = (800, 1250, 1600, 1450)
@@ -1081,7 +1081,7 @@ def data_formating_Google(text):
 
 def Extract_Data_Lokmat(pdf_bytes):
 
-    images = convert_from_bytes(pdf_bytes)
+    images = convert_from_bytes(pdf_bytes,dpi=500)
 
     invoice_details = (150, 200, 700, 290)
     amount_details = (940, 1260, 1490, 1480)
@@ -1164,7 +1164,7 @@ def data_formating_Lokmat(text):
 
 def check_file(pdf_bytes):
 
-    images = convert_from_bytes(pdf_bytes)
+    images = convert_from_bytes(pdf_bytes,dpi=500)
 
     text = pytesseract.image_to_string(
         images[0],
