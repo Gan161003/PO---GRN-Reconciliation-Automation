@@ -830,8 +830,6 @@
 
 
 
-
-
 import streamlit as st
 import pandas as pd
 import pytesseract
@@ -849,9 +847,7 @@ from io import BytesIO
 # MADISON
 # ==========================================
 
-def Extract_Data_Madison(pdf_bytes):
-
-    images = convert_from_bytes(pdf_bytes,dpi=500)
+def Extract_Data_Madison(images):
 
     invoice_details = (50, 300, 1050, 650)
     amount_details = (1000, 1300, 1640, 1790)
@@ -925,9 +921,7 @@ def data_formating_Madison(text):
 # META
 # ==========================================
 
-def Extract_Data_Meta(pdf_bytes):
-
-    images = convert_from_bytes(pdf_bytes,dpi=500)
+def Extract_Data_Meta(images):
 
     invoice_details = (1040, 165, 1600, 390)
     amount_details = (1125, 1730, 1650, 1970)
@@ -987,9 +981,7 @@ def data_formating_Meta(text):
 # GOOGLE
 # ==========================================
 
-def Extract_Data_Google(pdf_bytes):
-
-    images = convert_from_bytes(pdf_bytes,dpi=500)
+def Extract_Data_Google(images):
 
     invoice_details = (90, 900, 750, 1050)
     amount_details = (800, 1250, 1600, 1450)
@@ -1078,9 +1070,7 @@ def data_formating_Google(text):
 # LOKMAT
 # ==========================================
 
-def Extract_Data_Lokmat(pdf_bytes):
-
-    images = convert_from_bytes(pdf_bytes,dpi=500)
+def Extract_Data_Lokmat(images):
 
     invoice_details = (150, 200, 700, 290)
     amount_details = (940, 1260, 1490, 1480)
@@ -1161,33 +1151,65 @@ def data_formating_Lokmat(text):
 # DETECT FILE TYPE
 # ==========================================
 
-def check_file(pdf_bytes):
+# def check_file(pdf_bytes):
 
-    images = convert_from_bytes(pdf_bytes,dpi=500)
+#     images = convert_from_bytes(pdf_bytes,dpi=500)
+
+#     text = pytesseract.image_to_string(
+#         images[0],
+#         config=r'--oem 3 --psm 4'
+#     )
+
+#     if 'madison' in text.lower():
+#         return data_formating_Madison(
+#             Extract_Data_Madison(pdf_bytes)
+#         )
+
+#     elif 'meta' in text.lower():
+#         return data_formating_Meta(
+#             Extract_Data_Meta(pdf_bytes)
+#         )
+
+#     elif 'google' in text.lower():
+#         return data_formating_Google(
+#             Extract_Data_Google(pdf_bytes)
+#         )
+
+#     elif 'lokmat' in text.lower():
+#         return data_formating_Lokmat(
+#             Extract_Data_Lokmat(pdf_bytes)
+#         )
+
+#     return {}
+
+
+def check_file(images):
+
+    header = images[0].crop((0, 0, 1200, 500))
 
     text = pytesseract.image_to_string(
-        images[0],
-        config=r'--oem 3 --psm 4'
-    )
+        header,
+        config=r'--oem 3 --psm 6'
+    ).lower()
 
-    if 'madison' in text.lower():
+    if 'madison' in text:
         return data_formating_Madison(
-            Extract_Data_Madison(pdf_bytes)
+            Extract_Data_Madison(images)
         )
 
-    elif 'meta' in text.lower():
+    elif 'meta' in text:
         return data_formating_Meta(
-            Extract_Data_Meta(pdf_bytes)
+            Extract_Data_Meta(images)
         )
 
-    elif 'google' in text.lower():
+    elif 'google' in text:
         return data_formating_Google(
-            Extract_Data_Google(pdf_bytes)
+            Extract_Data_Google(images)
         )
 
-    elif 'lokmat' in text.lower():
+    elif 'lokmat' in text:
         return data_formating_Lokmat(
-            Extract_Data_Lokmat(pdf_bytes)
+            Extract_Data_Lokmat(images)
         )
 
     return {}
@@ -1337,20 +1359,45 @@ if uploaded_files:
 
         for file in uploaded_files:
 
-            pdf_bytes = file.read()
+        def process_pdf(file):
 
             try:
-                results[count] = check_file(pdf_bytes, file.name)
-                
+        
+                pdf_bytes = file.read()
+        
+                images = convert_from_bytes(
+                    pdf_bytes,
+                    dpi=250,
+                    first_page=1,
+                    last_page=1
+                )
+        
+                result = check_file(images)
+        
+                result["File Name"] = file.name
+        
+                return result
+        
             except Exception as e:
-                results[count] = {
+        
+                return {
                     "File Name": file.name,
                     "Error": str(e)
                 }
-
-            results[count]["File Name"] = file.name
-
-            count += 1
+        
+        
+        with ThreadPoolExecutor(max_workers=4) as executor:
+        
+            processed = list(
+                executor.map(
+                    process_pdf,
+                    uploaded_files
+                )
+            )
+        
+        for i, result in enumerate(processed, start=1):
+        
+            results[i] = result
 
     df = pd.DataFrame.from_dict(
         results,
