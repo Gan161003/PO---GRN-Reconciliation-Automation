@@ -61,7 +61,7 @@ def process_invoice_pdfs(invoice_files):
 # =========================================================
 
 def check_file(path):
-    POPPLER_PATH = r"C:\poppler-24.08.0\Library\bin"
+    poppler_path = r"C:\poppler-24.08.0\Library\bin"
     
     custom_config = r'--oem 3 --psm 4'
 
