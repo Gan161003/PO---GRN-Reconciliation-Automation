@@ -184,6 +184,16 @@ def data_formating_Meta(text):
     
                 temp[key] = value
                 
+    else:
+            parts = line.split(maxsplit=2)
+ 
+            if len(parts) >= 3:
+                key = f"{parts[0]} {parts[1]}"
+                value = parts[2]
+            if key in required_fields:
+                temp[key] = value
+
+                
     st.write(temp)        
     return temp
 
