@@ -1047,7 +1047,7 @@ def run_po_grn():
                     'Invoice Number',
                     'PO Num',
                     'Taxable Amount',
-                    'Total Payable (A+B)'
+                    'Total Amount'
                 ]
 
                 # =================================================
@@ -1110,7 +1110,7 @@ def run_po_grn():
                     'Invoice Number',
                     'PO Num',
                     'Taxable Amount',
-                    'Total Payable (A+B)'
+                    'Total Amount'
                 ]].copy()
 
                 invoice_data.columns = [
