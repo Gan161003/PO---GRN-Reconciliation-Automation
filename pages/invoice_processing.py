@@ -151,6 +151,7 @@ def Extract_Data_Meta(path):
     amount_text = pytesseract.image_to_string(amount_img, config=r'--oem 3 --psm 6')
 
     text = invoice_details_text.replace('\n\n','\n')+amount_text.replace('\n\n','\n')
+    st.write(text)
     return text
 
 def data_formating_Meta(text):
