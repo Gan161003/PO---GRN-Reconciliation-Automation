@@ -61,12 +61,12 @@ def process_invoice_pdfs(invoice_files):
 # =========================================================
 
 def check_file(path):
-    poppler_path = r"C:\poppler-24.08.0\Library\bin"
+    # poppler_path = r"C:\poppler-24.08.0\Library\bin"
     
     custom_config = r'--oem 3 --psm 4'
 
     # Convert PDF pages to images  poppler_path=poppler_path
-    images = convert_from_bytes(path, poppler_path=poppler_path)
+    images = convert_from_bytes(path)
 
     text = pytesseract.image_to_string(images[0], config=custom_config)
     
@@ -81,12 +81,12 @@ def check_file(path):
 
 def Extract_Data_Madison(path):
     # Specify Poppler path directly
-    poppler_path = r"C:\poppler-24.08.0\Library\bin"
+    # poppler_path = r"C:\poppler-24.08.0\Library\bin"
     
     custom_config = r'--oem 3 --psm 4'
 
     # Convert PDF pages to images  poppler_path=poppler_path
-    images = convert_from_bytes(path, poppler_path=poppler_path)
+    images = convert_from_bytes(path)
     
     invoice_details = (50,300,1050,650)
     amount_details = (1000,1300,1640,1790)
@@ -133,12 +133,12 @@ def data_formating_Madison(text):
 
 def Extract_Data_Meta(path):
     # Specify Poppler path directly
-    poppler_path = r"C:\poppler-24.08.0\Library\bin"
+    # poppler_path = r"C:\poppler-24.08.0\Library\bin"
     
     custom_config = r'--oem 3 --psm 4'
 
     # Convert PDF pages to images  poppler_path=poppler_path
-    images = convert_from_bytes(path, poppler_path=poppler_path)
+    images = convert_from_bytes(path)
     
     invoice_details = (1040,165,1600,390)
     amount_details =  (1125,1730,1650,1970)
@@ -185,12 +185,12 @@ def data_formating_Meta(text):
 
 def Extract_Data_Google(path):
     # Specify Poppler path directly
-    poppler_path = r"C:\poppler-24.08.0\Library\bin"
+    # poppler_path = r"C:\poppler-24.08.0\Library\bin"
     
     custom_config = r'--oem 3 --psm 4'
 
     # Convert PDF pages to images  poppler_path=poppler_path
-    images = convert_from_bytes(path, poppler_path=poppler_path)
+    images = convert_from_bytes(path)
     
     invoice_details = (90,900,750,1050)
     amount_details = (800,1250,1600,1450)
@@ -243,12 +243,13 @@ def data_formating_Google(text):
 
 def Extract_Data_Lokmat(path):
     # Specify Poppler path directly
-    poppler_path = r"C:\poppler-24.08.0\Library\bin"
+    # poppler_path = r"C:\poppler-24.08.0\Library\bin"
+    
     
     custom_config = r'--oem 3 --psm 4'
 
     # Convert PDF pages to images  poppler_path=poppler_path
-    images = convert_from_bytes(path, poppler_path=poppler_path)
+    images = convert_from_bytes(path)
     
     invoice_details = (150,200,700,290)
     amount_details = (940,1260,1490,1480)
