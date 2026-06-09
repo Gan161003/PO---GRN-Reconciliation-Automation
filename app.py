@@ -1044,7 +1044,7 @@ def run_po_grn():
                 ]
 
                 invoice_required_columns = [
-                    'Invoice Num',
+                    'Invoice Number',
                     'PO Num',
                     'Taxable Amount',
                     'Total Payable (A+B)'
@@ -1107,7 +1107,7 @@ def run_po_grn():
                 # =================================================
 
                 invoice_data = invoice_df[[
-                    'Invoice Num',
+                    'Invoice Number',
                     'PO Num',
                     'Taxable Amount',
                     'Total Payable (A+B)'
