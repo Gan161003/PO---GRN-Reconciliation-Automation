@@ -181,7 +181,8 @@ def data_formating_Meta(text):
                     value = value.lstrip("—").strip()
     
                 temp[key] = value
-            
+                
+    st.write(temp)        
     return temp
 
 def Extract_Data_Google(path):
